@@ -7,8 +7,8 @@ import pickle
 from collections import defaultdict
 
 np.random.seed(42)
-
-with open('q_table.pkl', 'rb') as f:
+# with open('q_table.pkl', 'rb') as f:
+with open('q_table-120000.pkl', 'rb') as f:
     print('load')
     loaded_dict = pickle.load(f)
     q_table_list = loaded_dict  # Replace 0 with your default value
