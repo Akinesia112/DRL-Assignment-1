@@ -14,7 +14,6 @@ with open('q_table.pkl', 'rb') as f:
     q_table_list = loaded_dict  # Replace 0 with your default value
     q_table = {k:np.array(v) for k,v in q_table_list.items()}
 
-#print('len of q_table',len(q_table.keys()))
 global stations, candidates_p,candidates_goal, pickup, last_action, last_record_action
 stations = [[0,0] for _ in range(4)]
 candidates_p = [i for i in stations]
@@ -42,21 +41,14 @@ def get_state_obs(obs,action,last_action=None):
         candidates_p = [tuple(i) for i in stations]
         pickup=False
     if passenger_look:
-        #print('before p',candidates_p)
         candidates_p = [ tuple(x) for x in candidates_p if abs(x[0]-agent_pos[0])+abs(x[1]-agent_pos[1]) <=1 ]
-        #print('after p',candidates_p)
     else:
-        #print('before p',candidates_p)
         candidates_p = [ tuple(x) for x in candidates_p if abs(x[0]-agent_pos[0])+abs(x[1]-agent_pos[1]) >1 ]
-        #print('after p',candidates_p)
+
     if destination_look:
-        #print('before g',candidates_goal)
         candidates_goal = [ tuple(x) for x in candidates_goal if abs(x[0]-agent_pos[0])+abs(x[1]-agent_pos[1]) <=1 ]
-        #print('after g',candidates_goal)
     else:
-        #print('before g',candidates_goal)
         candidates_goal = [ tuple(x) for x in candidates_goal if abs(x[0]-agent_pos[0])+abs(x[1]-agent_pos[1]) >1 ]
-        #print('after g',candidates_goal)
     reward_shaping = -0.1
     if action==pickup_id and not pickup and agent_pos in candidates_p:
         pickup = True
@@ -66,12 +58,11 @@ def get_state_obs(obs,action,last_action=None):
         candidates_p.append(agent_pos)
     cmp_pos = (0,0)
     if not pickup:
-        # choose the one that is closest to the agent
-        idx = 0 #np.argmin([abs(agent_pos[0]-i[0])+abs(agent_pos[1]-i[1]) for i in candidates_p])
+        idx = 0 
         cmp_pos = candidates_p[idx]
     else:
         # choose the one that is closest to the agent
-        idx = 0 #np.argmin([abs(agent_pos[0]-i[0])+abs(agent_pos[1]-i[1]) for i in candidates_goal])
+        idx = 0 
         cmp_pos = candidates_goal[idx]
     passenger_look = passenger_look and agent_pos in candidates_p
     destination_look = destination_look and agent_pos in candidates_goal
@@ -81,13 +72,13 @@ def get_state_obs(obs,action,last_action=None):
     if action==drop_id and (not pickup or not real_look):
         reward_shaping -=20
     if action == 0 and obstacle_south:
-        reward_shaping -=20
+        reward_shaping -=50
     if action == 1 and obstacle_north:
-        reward_shaping -=20
+        reward_shaping -=50
     if action == 2 and obstacle_east:
-        reward_shaping -=20
+        reward_shaping -=50
     if action == 3 and obstacle_west:
-        reward_shaping -=20
+        reward_shaping -=50
     relative_pos = (cmp(agent_pos[0],cmp_pos[0]),cmp(agent_pos[1],cmp_pos[1]))
     return (relative_pos,pickup,real_look, (obstacle_north,obstacle_south,obstacle_east,obstacle_west),last_action),reward_shaping
 
