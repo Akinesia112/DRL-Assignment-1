@@ -2,3 +2,7 @@ tqdm
 requests
 argparse
 torch
+numpy
+pandas
+matplotlib
+

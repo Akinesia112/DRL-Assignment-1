@@ -28,11 +28,69 @@ class SimpleTaxiEnv():
        
         self.obstacles = set()  # No obstacles in simple version
         self.destination = None
+        
+    def legal(self):
+        available_positions = [
+            (x, y) for x in range(self.grid_size) for y in range(self.grid_size)
+            if (x, y) not in self.obstacles
+        ]
+        n = len(available_positions)
+        p = [0 for i in range(n)]
+        global group_size
+        group_size = n
+        
+        def find_parent(x):
+            if x != p[x]:
+                p[x] = find_parent(p[x])
+            return p[x]
+            
+        def Union(a, b):
+            global group_size
+            a = find_parent(a)
+            b = find_parent(b)
+            if a != b:
+                group_size -= 1
+                if np.random.randint(2) == 0:
+                    p[a] = b
+                else:
+                    p[b] = a
+                    
+        for i in range(n):
+            p[i] = i
+            
+        for i in range(n):
+            for j in range(i+1, n):
+                if abs(available_positions[i][0]-available_positions[j][0])+abs(available_positions[i][1]-available_positions[j][1]) == 1:
+                    Union(i, j)
+                    
+        return group_size == 1
 
     def reset(self):
         """Reset the environment, ensuring Taxi, passenger, and destination are not overlapping obstacles"""
         self.current_fuel = self.fuel_limit
         self.passenger_picked_up = False
+        
+        self.grid_size = np.random.randint(5, 11)
+        
+        # Generate new stations
+        self.stations = []
+        while len(self.stations) < 4:
+            posx, posy = np.random.randint(0, self.grid_size), np.random.randint(0, self.grid_size)
+            # check posx,posy is not adjacent to existed stations
+            if not any([abs(posx-station[0])+abs(posy-station[1]) <= 1 for station in self.stations]):
+                self.stations.append((posx, posy))
+                
+        # Generate obstacles
+        self.obstacles = set()
+        obstacle_len = np.random.randint(0, self.grid_size * self.grid_size)
+        cnt = 0 
+        while len(self.obstacles) < obstacle_len and cnt < self.grid_size * self.grid_size:
+            posx, posy = np.random.randint(0, self.grid_size), np.random.randint(0, self.grid_size)
+            if (posx, posy) not in self.stations and (posx, posy) not in self.obstacles:
+                self.obstacles.add((posx, posy))
+                if not self.legal():
+                    self.obstacles.remove((posx, posy))
+            cnt = cnt + 1
         
 
         available_positions = [
@@ -142,10 +200,19 @@ class SimpleTaxiEnv():
         '''
         
         
-        grid[0][0]='R'
-        grid[0][4]='G'
-        grid[4][0]='Y'
-        grid[4][4]='B'
+        # grid[0][0]='R'
+        # grid[0][4]='G'
+        # grid[4][0]='Y'
+        # grid[4][4]='B'
+        
+        stations_char = ['R', 'G', 'B', 'Y']
+        for i in range(len(self.stations)):
+            sy, sx = self.stations[i]
+            grid[sy][sx] = stations_char[i]
+            
+        for oy, ox in self.obstacles:
+            grid[oy][ox] = '#'
+            
         '''
         # Place destination
         dy, dx = destination_pos
@@ -186,7 +253,7 @@ def run_agent(agent_file, env_config, render=False):
     total_reward = 0
     done = False
     step_count = 0
-    stations = [(0, 0), (0, 4), (4, 0), (4,4)]
+    # stations = [(0, 0), (0, 4), (4, 0), (4,4)]
     
     taxi_row, taxi_col, _,_,_,_,_,_,_,_,obstacle_north, obstacle_south, obstacle_east, obstacle_west, passenger_look, destination_look = obs
 
