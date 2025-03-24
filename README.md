@@ -1,6 +1,6 @@
-# DRL Taxi Assignment
+# DRL Assignment: OpenAI Gym’s Taxi-v3
 
-This project implements a reinforcement learning (RL) agent to navigate a dynamic taxi environment inspired by OpenAI Gym’s Taxi-v3. The goal is to train an agent that can efficiently pick up and drop off passengers in a grid-world with randomized configurations, dynamic obstacles, and varying grid sizes.
+This project implements a deep reinforcement learning (DRL) agent to navigate a dynamic taxi environment inspired by OpenAI Gym’s Taxi-v3. The goal is to train an agent that can efficiently pick up and drop off passengers in a grid-world with randomized configurations, dynamic obstacles, and varying grid sizes.
 
 ---
 
